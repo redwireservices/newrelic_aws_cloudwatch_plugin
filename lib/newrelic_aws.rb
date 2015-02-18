@@ -150,7 +150,7 @@ module NewRelicAWS
 
   module RDS
     class Agent < Base::Agent
-      agent_guid "com.newrelic.aws.rds"
+      agent_guid "com.redwireservices.aws.rds"
       agent_version NewRelicAWS::VERSION
       agent_human_labels("RDS") { "RDS" }
     end
