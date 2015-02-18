@@ -14,6 +14,8 @@ module NewRelicAWS
           :region => @aws_region
         )
         rds.instances.map { |instance| instance.id }
+
+        infoClient = instanceInfoRds.client
       end
 
       def metric_list
@@ -39,6 +41,25 @@ module NewRelicAWS
         data_points = []
         instance_ids.each do |instance_id|
           metric_list.each do |(metric_name, statistic, unit)|
+            if :metric_name == "FreeStorageSpace"
+              resp = infoClient.describe_db_instances({
+                  :db_instance_identifier => instance_id
+              })
+              resp_hash = resp.data
+               
+              instanceStorage = 
+                  resp_hash[:db_instances][0][:allocated_storage]
+               
+              instanceByteStorage = 
+                   ((( instanceStorage * 1024 ) * 1024) * 1024)
+
+              instanceStoragePercentUsed =
+                   ((instanceByteStorage - statistic)/(instanceByteStorage/100))
+
+              request.add_metric(
+                  component, "Component/ DiskSpaceUsed [percent]", instanceStoragePercentUsed
+              )
+            end
             data_point = get_data_point(
               :namespace   => "AWS/RDS",
               :metric_name => metric_name,
