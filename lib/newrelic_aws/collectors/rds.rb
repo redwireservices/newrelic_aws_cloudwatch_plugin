@@ -14,8 +14,6 @@ module NewRelicAWS
           :region => @aws_region
         )
         rds.instances.map { |instance| instance.id }
-
-        infoClient = instanceInfoRds.client
       end
 
       def metric_list
@@ -38,6 +36,13 @@ module NewRelicAWS
       end
 
       def collect
+        instanceInfoRds = AWS::RDS.new(
+          :access_key_id => @aws_access_key,
+          :secret_access_key => @aws_secret_key,
+          :region => @aws_region
+        )
+        infoClient = instanceInfoRds.client
+
         data_points = []
         instance_ids.each do |instance_id|
           metric_list.each do |(metric_name, statistic, unit)|
